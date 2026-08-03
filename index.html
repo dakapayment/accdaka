@@ -26,7 +26,7 @@
                             50: '#f0fdf4',
                             100: '#dcfce7',
                             500: '#22c55e',
-                            600: '#16a34a', // Hijau Utama
+                            600: '#16a34a', // Hijau Utama (#16A34A)
                             700: '#15803d',
                         }
                     },
@@ -42,7 +42,7 @@
         }
     </script>
 
-    <!-- Chart.js & JsBarcode CDN -->
+    <!-- Chart.js CDN & JsBarcode -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
@@ -76,6 +76,7 @@
     <!-- MAIN APP CONTAINER -->
     <div id="app" class="max-w-md md:max-w-6xl mx-auto min-h-screen flex flex-col relative shadow-xl md:my-4 bg-white dark:bg-gray-950 md:rounded-2xl overflow-hidden">
 
+        <!-- HEADER & NAVBAR -->
         <header class="sticky top-0 z-30 glassmorphism border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('store')">
                 <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-brand-500/20">
@@ -83,27 +84,25 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-base md:text-lg leading-tight text-gray-900 dark:text-white" id="store-name-display">GriyaAksesoris</h1>
-                    <span class="text-[10px] text-gray-500 dark:text-gray-400 block -mt-0.5">Sparepart & Aksesoris HP</span>
+                    <span class="text-[10px] text-gray-500 dark:text-gray-400 block -mt-0.5">Katalog Sparepart & Aksesoris</span>
                 </div>
             </div>
 
             <!-- Header Actions -->
             <div class="flex items-center gap-2">
-                <!-- Search Toggle / Input (Desktop) -->
-                <div class="relative hidden sm:block w-48 lg:w-64">
-                    <input type="text" id="desktop-search-input" onkeyup="handleSearch(this.value)" placeholder="Cari LCD, Baterai, Flexible..." 
-                           class="w-full bg-gray-100 dark:bg-gray-800 text-xs py-2 pl-8 pr-3 rounded-full border-none focus:ring-2 focus:ring-brand-600 outline-none">
-                    <i class="material-icons-outlined absolute left-2.5 top-2 text-gray-400 text-sm">search</i>
-                </div>
+                <!-- Refresh Data Live Button -->
+                <button onclick="loadLiveCatalog(true)" title="Refresh Katalog" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 transition">
+                    <i class="material-icons-outlined text-xl">refresh</i>
+                </button>
 
-                <!-- Customer History Button -->
-                <button onclick="openHistoryModal()" title="Riwayat Transaksi" class="p-2 rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 hover:bg-brand-100 transition flex items-center gap-1">
+                <!-- Customer Transaction History Button -->
+                <button onclick="openHistoryModal()" title="Riwayat Transaksi Saya" class="p-2 rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 hover:bg-brand-100 transition flex items-center gap-1">
                     <i class="material-icons-outlined text-xl">receipt_long</i>
                     <span class="text-xs font-semibold hidden md:inline">Riwayat</span>
                 </button>
 
-                <!-- Admin Mode Toggle Button -->
-                <button onclick="toggleAdminView()" title="Portal Admin" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                <!-- Admin Mode Button -->
+                <button onclick="toggleAdminView()" title="Portal Admin" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 transition">
                     <i class="material-icons-outlined text-xl">admin_panel_settings</i>
                 </button>
 
@@ -118,21 +117,24 @@
         <!-- SEARCH BAR MOBILE -->
         <div class="sm:hidden px-4 py-2 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
             <div class="relative">
-                <input type="text" id="mobile-search-input" onkeyup="handleSearch(this.value)" placeholder="Cari LCD, Lem, Tombol, Touchscreen..." 
+                <input type="text" id="mobile-search-input" onkeyup="handleSearch(this.value)" placeholder="Cari LCD, Baterai, Flexible, Lem..." 
                        class="w-full bg-gray-100 dark:bg-gray-800 text-xs py-2.5 pl-9 pr-3 rounded-full border-none focus:ring-2 focus:ring-brand-600 outline-none">
                 <i class="material-icons-outlined absolute left-3 top-2.5 text-gray-400 text-base">search</i>
             </div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- VIEW 1: PELANGGAN / KATALOG STORE FRONT    -->
+        <!-- ========================================== -->
         <main id="view-store" class="flex-1 overflow-y-auto pb-12">
             <!-- PROMO BANNER -->
             <div class="px-4 mt-3">
-                <div class="relative rounded-2xl overflow-hidden bg-gradient-to-r from-brand-600 to-emerald-800 text-white p-5 shadow-lg shadow-brand-600/10 flex items-center justify-between">
+                <div class="relative rounded-2xl overflow-hidden bg-gradient-to-r from-brand-600 to-emerald-800 text-white p-5 shadow-lg flex items-center justify-between">
                     <div class="z-10 max-w-[65%]">
-                        <span class="bg-white/20 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">Promo Spesial</span>
-                        <h2 class="font-bold text-lg leading-tight mt-1">Diskon Sparepart HP s/d 30%</h2>
-                        <p class="text-xs text-emerald-100 mt-1">Stok Lengkap Original & Garansi Toko.</p>
-                        <button onclick="scrollToProducts()" class="mt-3 bg-white text-brand-700 font-semibold text-xs px-3.5 py-1.5 rounded-xl shadow hover:bg-emerald-50 transition">Lihat Katalog</button>
+                        <span class="bg-white/20 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">Katalog Lengkap</span>
+                        <h2 class="font-bold text-lg leading-tight mt-1">Sparepart HP Bergaransi</h2>
+                        <p class="text-xs text-emerald-100 mt-1">Stok terupdate langsung dari toko kami.</p>
+                        <button onclick="scrollToProducts()" class="mt-3 bg-white text-brand-700 font-semibold text-xs px-3.5 py-1.5 rounded-xl shadow hover:bg-emerald-50 transition">Lihat Produk</button>
                     </div>
                     <div class="text-6xl text-white/20">
                         <i class="fa-solid fa-mobile-screen"></i>
@@ -140,15 +142,13 @@
                 </div>
             </div>
 
-            <!-- CATEGORIES HORIZONTAL SCROLL -->
+            <!-- CATEGORIES SCROLL -->
             <div class="mt-5 px-4">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="font-semibold text-sm text-gray-800 dark:text-gray-200">Kategori Produk</h3>
                     <span class="text-xs text-brand-600 font-medium cursor-pointer" onclick="filterCategory('All')">Lihat Semua</span>
                 </div>
-                <div id="category-bar" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-                    <!-- Dynamic categories injected by JS -->
-                </div>
+                <div id="category-bar" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1"></div>
             </div>
 
             <!-- PRODUCT GRID (TikTok Shop Style) -->
@@ -163,12 +163,13 @@
                 </div>
 
                 <!-- Product Grid Container -->
-                <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    <!-- Dynamic Products injected here -->
-                </div>
+                <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
             </div>
         </main>
 
+        <!-- ========================================== -->
+        <!-- VIEW 2: ADMIN DASHBOARD PANEL              -->
+        <!-- ========================================== -->
         <main id="view-admin" class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 hidden">
             <!-- ADMIN LOGIN OVERLAY -->
             <div id="admin-login-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -177,29 +178,29 @@
                         <div class="w-12 h-12 bg-brand-100 dark:bg-brand-950 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-2">
                             <i class="material-icons-outlined text-2xl">lock</i>
                         </div>
-                        <h2 class="font-bold text-lg">Login Panel Admin</h2>
-                        <p class="text-xs text-gray-500">Masukkan kata sandi admin untuk melanjutkan.</p>
+                        <h2 class="font-bold text-lg">Login Admin</h2>
+                        <p class="text-xs text-gray-500">Masukkan kata sandi admin untuk mengelola produk.</p>
                     </div>
                     <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                         <div>
                             <label class="block text-xs font-medium mb-1">Password Admin</label>
-                            <input type="password" id="admin-pass-input" required placeholder="Sandi standar: admin123" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-brand-600 outline-none">
+                            <input type="password" id="admin-pass-input" required placeholder="Sandi: admin123" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-brand-600 outline-none">
                         </div>
                         <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium text-xs py-3 rounded-xl shadow-md transition">Masuk Panel</button>
-                        <button type="button" onclick="switchTab('store')" class="w-full text-xs text-gray-500 hover:underline">Kembali ke Toko</button>
+                        <button type="button" onclick="switchTab('store')" class="w-full text-xs text-gray-500 hover:underline">Kembali ke Katalog</button>
                     </form>
                 </div>
             </div>
 
-            <!-- ADMIN CONTENT CONTENT AREA -->
+            <!-- ADMIN CONTENT AREA -->
             <div id="admin-panel-content" class="p-4 space-y-5">
-                <!-- Admin Navigation Tabs -->
+                <!-- Admin Tabs -->
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-gray-200 dark:border-gray-800">
-                    <button onclick="switchAdminMenu('dashboard')" id="btn-admin-dashboard" class="admin-tab-btn active px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap bg-brand-600 text-white">Dashboard</button>
-                    <button onclick="switchAdminMenu('products')" id="btn-admin-products" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 whitespace-nowrap">Produk</button>
-                    <button onclick="switchAdminMenu('stock')" id="btn-admin-stock" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 whitespace-nowrap">Stok</button>
-                    <button onclick="switchAdminMenu('orders')" id="btn-admin-orders" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 whitespace-nowrap">Pesanan</button>
-                    <button onclick="switchAdminMenu('settings')" id="btn-admin-settings" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 whitespace-nowrap">Pengaturan API</button>
+                    <button onclick="switchAdminMenu('dashboard')" id="btn-admin-dashboard" class="admin-tab-btn active px-3 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 text-white">Dashboard</button>
+                    <button onclick="switchAdminMenu('products')" id="btn-admin-products" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">Produk</button>
+                    <button onclick="switchAdminMenu('stock')" id="btn-admin-stock" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">Stok</button>
+                    <button onclick="switchAdminMenu('orders')" id="btn-admin-orders" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">Pesanan</button>
+                    <button onclick="switchAdminMenu('settings')" id="btn-admin-settings" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800">Pengaturan API</button>
                 </div>
 
                 <!-- SUB-VIEW 1: DASHBOARD STATS -->
@@ -224,15 +225,8 @@
                     </div>
 
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                        <h4 class="font-semibold text-xs mb-3 text-gray-700 dark:text-gray-300">Grafik Penjualan 7 Hari Terakhir</h4>
-                        <div class="h-48">
-                            <canvas id="salesChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h4 class="font-semibold text-xs text-red-500 mb-2 flex items-center gap-1">
-                            <i class="material-icons-outlined text-sm">warning</i> Restock Warning
+                            <i class="material-icons-outlined text-sm">warning</i> Peringatan Stok
                         </h4>
                         <div id="low-stock-list" class="space-y-2 text-xs divide-y divide-gray-100 dark:divide-gray-700"></div>
                     </div>
@@ -241,8 +235,8 @@
                 <!-- SUB-VIEW 2: PRODUCT MANAGEMENT -->
                 <div id="sub-admin-products" class="hidden space-y-3">
                     <div class="flex items-center justify-between">
-                        <h3 class="font-bold text-sm">Manajemen Produk</h3>
-                        <button onclick="openProductModal()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs px-3 py-1.5 rounded-xl font-medium flex items-center gap-1">
+                        <h3 class="font-bold text-sm">Kelola Produk & Spreadsheet</h3>
+                        <button onclick="openProductModal()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs px-3 py-1.5 rounded-xl font-medium flex items-center gap-1 shadow">
                             <i class="material-icons-outlined text-sm">add</i> Tambah Produk
                         </button>
                     </div>
@@ -251,7 +245,7 @@
 
                 <!-- SUB-VIEW 3: STOCK MANAGEMENT -->
                 <div id="sub-admin-stock" class="hidden space-y-3">
-                    <h3 class="font-bold text-sm">Penyesuaian & Riwayat Stok</h3>
+                    <h3 class="font-bold text-sm">Penyesuaian Stok</h3>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 space-y-3">
                         <form onsubmit="handleStockAdjust(event)" class="space-y-2">
                             <div>
@@ -273,15 +267,10 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium mb-1">Keterangan / Catatan</label>
-                                <input type="text" id="stock-adjust-note" placeholder="Contoh: Barang datang dari supplier" class="w-full text-xs p-2 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                                <input type="text" id="stock-adjust-note" placeholder="Contoh: Restock dari supplier" class="w-full text-xs p-2 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700">
                             </div>
-                            <button type="submit" class="w-full bg-brand-600 text-white text-xs py-2 rounded-xl font-medium">Update Stok</button>
+                            <button type="submit" id="btn-adjust-stock" class="w-full bg-brand-600 text-white text-xs py-2 rounded-xl font-medium">Update Stok ke Spreadsheet</button>
                         </form>
-                    </div>
-
-                    <div class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                        <h4 class="font-semibold text-xs mb-2">Riwayat Perubahan Stok</h4>
-                        <div id="stock-history-list" class="space-y-1.5 text-xs max-h-60 overflow-y-auto"></div>
                     </div>
                 </div>
 
@@ -291,27 +280,24 @@
                     <div id="admin-orders-list" class="space-y-2"></div>
                 </div>
 
-                <!-- SUB-VIEW 5: SETTINGS & GAS CONFIG -->
+                <!-- SUB-VIEW 5: SETTINGS -->
                 <div id="sub-admin-settings" class="hidden space-y-3">
-                    <h3 class="font-bold text-sm">Pengaturan Toko & REST API Google Apps Script</h3>
+                    <h3 class="font-bold text-sm">Konfigurasi Google Apps Script URL</h3>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 space-y-3">
                         <div>
-                            <label class="block text-xs font-medium mb-1">Google Apps Script Web App URL</label>
-                            <input type="text" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full text-xs p-2 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                            <label class="block text-xs font-medium mb-1">Google Apps Script Web App URL *</label>
+                            <input type="text" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+                            <p class="text-[10px] text-gray-500 mt-1">URL ini menghubungkan web dengan Google Spreadsheet agar semua HP pelanggan melihat produk yang sama.</p>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium mb-1">Telegram Bot Token</label>
-                            <input type="text" id="cfg-telegram-token" placeholder="123456789:ABCdef..." class="w-full text-xs p-2 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium mb-1">Telegram Chat ID</label>
-                            <input type="text" id="cfg-telegram-chatid" placeholder="-100xxxxxxx" class="w-full text-xs p-2 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700">
-                        </div>
-                        <button onclick="saveSettings()" class="w-full bg-brand-600 text-white text-xs py-2 rounded-xl font-medium">Simpan Konfigurasi</button>
+                        <button onclick="saveSettings()" class="w-full bg-brand-600 text-white text-xs py-2.5 rounded-xl font-medium">Simpan Konfigurasi URL</button>
                     </div>
                 </div>
             </div>
         </main>
+
+        <!-- ========================================== -->
+        <!-- MODALS & DRAWERS                           -->
+        <!-- ========================================== -->
 
         <!-- PRODUCT DETAIL MODAL -->
         <div id="detail-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center hidden">
@@ -322,7 +308,6 @@
                 </div>
                 <div class="relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 aspect-square">
                     <img id="modal-img" src="" alt="Detail Produk" class="w-full h-full object-cover">
-                    <span id="modal-badge" class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"></span>
                 </div>
                 <div>
                     <h2 class="font-bold text-base text-gray-900 dark:text-white" id="modal-title">Nama Produk</h2>
@@ -383,14 +368,13 @@
 
                 <form onsubmit="handleCheckoutSubmit(event)" class="space-y-3 mt-3">
                     <div>
-                        <label class="block text-xs font-medium mb-1">Nama Lengkap *</label>
+                        <label class="block text-xs font-medium mb-1">Nama Lengkap Pemesan *</label>
                         <input type="text" id="cust-name" required placeholder="Masukkan Nama Anda" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800">
                     </div>
 
-                    <!-- Hidden or Auto-filled Phone field linked to Customer Session -->
+                    <!-- Hidden Customer Phone Session -->
                     <input type="hidden" id="cust-phone">
 
-                    <!-- Summary -->
                     <div class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700 text-xs space-y-1">
                         <div class="flex justify-between">
                             <span>Total Item</span>
@@ -403,13 +387,13 @@
                     </div>
 
                     <button type="submit" id="btn-submit-order" class="w-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold py-3 rounded-xl shadow-md transition">
-                        Buat Pesanan (Simpan ke Riwayat)
+                        Simpan Pesanan ke Spreadsheet
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- CUSTOMER LOGIN MODAL (BY PHONE NUMBER) -->
+        <!-- CUSTOMER LOGIN MODAL -->
         <div id="customer-login-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
             <div class="bg-white dark:bg-gray-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-gray-100 dark:border-gray-700">
                 <div class="text-center mb-4">
@@ -417,7 +401,7 @@
                         <i class="material-icons-outlined text-2xl">phone_iphone</i>
                     </div>
                     <h2 class="font-bold text-lg">Masuk Pelanggan</h2>
-                    <p class="text-xs text-gray-500">Masukkan Nomor WhatsApp untuk melihat Riwayat & Membuat Pesanan.</p>
+                    <p class="text-xs text-gray-500">Masukkan Nomor WhatsApp untuk menyimpan pesanan Anda.</p>
                 </div>
                 <form onsubmit="handleCustomerLogin(event)" class="space-y-3">
                     <div>
@@ -439,7 +423,7 @@
             <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl p-5 shadow-2xl max-h-[90vh] flex flex-col">
                 <div class="flex justify-between items-center border-b pb-3 dark:border-gray-800">
                     <div>
-                        <h3 class="font-bold text-base">Riwayat Transaksi</h3>
+                        <h3 class="font-bold text-base">Riwayat Transaksi Saya</h3>
                         <p class="text-[11px] text-gray-500" id="history-cust-info">Pelanggan: -</p>
                     </div>
                     <div class="flex items-center gap-2">
@@ -448,57 +432,36 @@
                     </div>
                 </div>
 
-                <div id="history-list-container" class="flex-1 overflow-y-auto py-3 space-y-2">
-                    <!-- History list items injected by JS -->
-                </div>
+                <div id="history-list-container" class="flex-1 overflow-y-auto py-3 space-y-2"></div>
             </div>
         </div>
 
-        <!-- HISTORY TRANSACTION DETAIL MODAL -->
+        <!-- HISTORY DETAIL MODAL (SEND TO WA) -->
         <div id="history-detail-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
             <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
                 <div class="flex justify-between items-center border-b pb-2 dark:border-gray-800">
-                    <h3 class="font-bold text-base">Rincian Pesanan</h3>
+                    <h3 class="font-bold text-base">Rincian Nota Pesanan</h3>
                     <button onclick="closeHistoryDetailModal()" class="text-gray-400 hover:text-gray-600"><i class="material-icons-outlined">close</i></button>
                 </div>
 
                 <div class="space-y-2 text-xs">
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Invoice:</span>
-                        <span class="font-bold" id="detail-invoice">-</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Tanggal:</span>
-                        <span id="detail-date">-</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Pemesan:</span>
-                        <span class="font-semibold" id="detail-customer">-</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-500">Status Pesanan:</span>
-                        <span id="detail-status" class="px-2 py-0.5 rounded-full text-[10px] font-bold"></span>
-                    </div>
-
+                    <div class="flex justify-between"><span class="text-gray-500">Invoice:</span><span class="font-bold" id="detail-invoice">-</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Tanggal:</span><span id="detail-date">-</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Pemesan:</span><span class="font-semibold" id="detail-customer">-</span></div>
                     <div class="border-t border-b dark:border-gray-800 py-2 my-2 space-y-1.5">
                         <span class="font-semibold block mb-1">Daftar Barang:</span>
                         <div id="detail-items-list" class="space-y-1"></div>
                     </div>
-
-                    <div class="flex justify-between text-sm font-bold text-brand-600">
-                        <span>Total Bayar:</span>
-                        <span id="detail-total">Rp 0</span>
-                    </div>
+                    <div class="flex justify-between text-sm font-bold text-brand-600"><span>Total Bayar:</span><span id="detail-total">Rp 0</span></div>
                 </div>
 
-                <!-- WhatsApp Send Button -->
                 <button onclick="sendWhatsAppToAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2 transition">
-                    <i class="fa-brands fa-whatsapp text-lg"></i> Kirim WhatsApp ke Admin
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Kirim WhatsApp ke Admin Toko
                 </button>
             </div>
         </div>
 
-        <!-- PRODUCT MODAL (ADD / EDIT) -->
+        <!-- PRODUCT FORM MODAL (ADD / EDIT) -->
         <div id="product-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
             <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center border-b pb-2 dark:border-gray-800">
@@ -538,7 +501,7 @@
                             <input type="number" id="prod-stock" required class="w-full text-xs p-2 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium mb-1">Minimal Stok (Batas Warning)</label>
+                            <label class="block text-xs font-medium mb-1">Minimal Stok Warning</label>
                             <input type="number" id="prod-min-stock" value="3" required class="w-full text-xs p-2 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800">
                         </div>
                     </div>
@@ -551,16 +514,24 @@
                         <textarea id="prod-desc" rows="2" class="w-full text-xs p-2 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800"></textarea>
                     </div>
 
-                    <button type="submit" class="w-full bg-brand-600 text-white text-xs font-semibold py-2.5 rounded-xl shadow">Simpan Produk</button>
+                    <button type="submit" id="btn-submit-prod" class="w-full bg-brand-600 text-white text-xs font-semibold py-2.5 rounded-xl shadow">Simpan Produk ke Spreadsheet</button>
                 </form>
             </div>
         </div>
 
     </div>
 
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC WITH REALTIME API         -->
+    <!-- ========================================== -->
     <script>
         let currentCustomer = JSON.parse(localStorage.getItem('app_customer') || 'null');
         let selectedOrderForDetail = null;
+        let selectedProductForDetail = null;
+        let isAdminLoggedIn = false;
+
+        // BACA URL API GAS DARI CONFIG LOCALSTORAGE
+        let configGASUrl = localStorage.getItem('cfg_gas_url') || '';
 
         const defaultCategories = [
             { id: '1', name: 'LCD', icon: 'smartphone' },
@@ -572,45 +543,37 @@
             { id: '7', name: 'Lainnya', icon: 'more_horiz' }
         ];
 
-        const defaultProducts = [
-            { id: 'P01', name: 'LCD iPhone 11 Original Fullset', category: 'LCD', cost: 250000, price: 380000, stock: 8, minStock: 3, barcode: '8991001', img: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400', desc: 'LCD Garansi Tes 7 hari. Kontras jernih & touch presisi.' },
-            { id: 'P02', name: 'Baterai Samsung A50 Original BPK', category: 'Baterai', cost: 65000, price: 110000, stock: 2, minStock: 3, barcode: '8991002', img: 'https://images.unsplash.com/photo-1619725002198-6a689b72f41d?w=400', desc: 'Baterai kapasitas murni 4000mAh awet tahan lama.' },
-            { id: 'P03', name: 'Lem LCD T7000 Hitam 110ml', category: 'Lem & Tools', cost: 18000, price: 35000, stock: 15, minStock: 5, barcode: '8991003', img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400', desc: 'Lem perekat LCD & Backdoor rekat maksimal tidak merusak frame.' },
-            { id: 'P04', name: 'Flexible On Off Xiaomi Redmi Note 8', category: 'Flexible', cost: 8000, price: 20000, stock: 0, minStock: 3, barcode: '8991004', img: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?w=400', desc: 'Flexible power + volume pengganti tombol bermasalah.' }
-        ];
-
         let categoriesData = defaultCategories;
-        let productsData = defaultProducts;
+        let productsData = [];
         let ordersData = [];
         let stockLogsData = [];
         let cartData = [];
         let currentCategory = 'All';
         let currentSearch = '';
         let currentSort = 'default';
-        let selectedProductForDetail = null;
-        let isAdminLoggedIn = false;
-
-        // Config State
-        let configGASUrl = localStorage.getItem('cfg_gas_url') || '';
-        let configTelegramToken = localStorage.getItem('cfg_telegram_token') || '';
-        let configTelegramChatId = localStorage.getItem('cfg_telegram_chatid') || '';
 
         window.addEventListener('DOMContentLoaded', async () => {
             renderCategoryBar();
             renderSkeletonProducts();
-            await loadLocalOrRemoteData();
-            renderCategoryBar();
-            renderProducts();
-            updateCartBadge();
-            initChart();
-
+            
             if (document.getElementById('cfg-gas-url')) {
                 document.getElementById('cfg-gas-url').value = configGASUrl;
-                document.getElementById('cfg-telegram-token').value = configTelegramToken;
-                document.getElementById('cfg-telegram-chatid').value = configTelegramChatId;
             }
+
+            await loadLiveCatalog();
         });
 
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-emerald-600' : 'bg-red-600';
+            toast.className = `${bg} text-white text-xs px-4 py-2.5 rounded-xl shadow-lg flex items-center justify-between pointer-events-auto transition-all transform duration-300`;
+            toast.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()" class="ml-2 font-bold">&times;</button>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // NORMALISASI DATA DARI SPREADSHEET (INDO KEY TO FE KEY)
         function normalizeProductData(raw) {
             if (!Array.isArray(raw)) return [];
             return raw.map((item, index) => ({
@@ -627,36 +590,32 @@
             }));
         }
 
-        async function loadLocalOrRemoteData() {
-            // 1. Cek LocalStorage
+        async function loadLiveCatalog(manualNotice = false) {
             const savedProds = localStorage.getItem('app_products');
-            if (savedProds) {
-                try { productsData = JSON.parse(savedProds); } catch(e){}
-            }
+            if (savedProds) productsData = JSON.parse(savedProds);
 
             const savedOrders = localStorage.getItem('app_orders');
-            if (savedOrders) {
-                try { ordersData = JSON.parse(savedOrders); } catch(e){}
-            }
+            if (savedOrders) ordersData = JSON.parse(savedOrders);
 
-            const savedLogs = localStorage.getItem('app_stock_logs');
-            if (savedLogs) {
-                try { stockLogsData = JSON.parse(savedLogs); } catch(e){}
-            }
-
-            // 2. Ambil data dari Google Apps Script jika URL dikonfigurasi
             if (configGASUrl) {
                 try {
                     const res = await fetch(`${configGASUrl}?action=getProduk`);
                     const resJson = await res.json();
-                    if (resJson.status === 'success' && Array.isArray(resJson.data) && resJson.data.length > 0) {
+                    if (resJson.status === 'success' && Array.isArray(resJson.data)) {
                         productsData = normalizeProductData(resJson.data);
-                        saveDataLocal();
+                        localStorage.setItem('app_products', JSON.stringify(productsData));
+                        if (manualNotice) showToast('Katalog berhasil diperbarui!');
                     }
                 } catch (err) {
-                    console.warn('Gagal mengambil data dari Apps Script, menggunakan data lokal:', err);
+                    console.warn('Gagal fetch live data, menggunakan data lokal:', err);
+                    if (manualNotice) showToast('Gagal terhubung ke server Apps Script', 'error');
                 }
+            } else if (manualNotice) {
+                showToast('URL Apps Script belum diatur di Pengaturan Admin', 'error');
             }
+
+            renderCategoryBar();
+            renderProducts();
         }
 
         function renderSkeletonProducts() {
@@ -670,71 +629,6 @@
                     <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
                 </div>
             `).join('');
-        }
-
-        function openHistoryDetailModal(invoice) {
-            const order = ordersData.find(o => o.invoice === invoice);
-            if (!order) return;
-
-            selectedOrderForDetail = order;
-
-            document.getElementById('detail-invoice').innerText = order.invoice;
-            document.getElementById('detail-date').innerText = order.date;
-            document.getElementById('detail-customer').innerText = `${order.customer} (${order.phone})`;
-            document.getElementById('detail-total').innerText = `Rp ${Number(order.total).toLocaleString('id-ID')}`;
-
-            const statusEl = document.getElementById('detail-status');
-            statusEl.innerText = order.status || 'Menunggu';
-            statusEl.className = `px-2 py-0.5 rounded-full text-[10px] font-bold ${order.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`;
-
-            const itemsContainer = document.getElementById('detail-items-list');
-            itemsContainer.innerHTML = order.items.map(i => `
-                <div class="flex justify-between text-xs">
-                    <span>${i.name} x${i.qty}</span>
-                    <span class="font-semibold">Rp ${Number(i.price * i.qty).toLocaleString('id-ID')}</span>
-                </div>
-            `).join('');
-
-            document.getElementById('history-detail-modal').classList.remove('hidden');
-        }
-
-        function closeHistoryDetailModal() {
-            document.getElementById('history-detail-modal').classList.add('hidden');
-        }
-
-        function sendWhatsAppToAdmin() {
-            if (!selectedOrderForDetail) return;
-
-            const o = selectedOrderForDetail;
-            const itemsText = o.items.map(i => `- ${i.name} (${i.qty}x)`).join('\n');
-            const waMsg = encodeURIComponent(
-                `Halo Admin, Saya ingin konfirmasi pesanan:\n\n` +
-                `*Invoice:* ${o.invoice}\n` +
-                `*Tanggal:* ${o.date}\n` +
-                `*Nama:* ${o.customer}\n` +
-                `*No. HP:* ${o.phone}\n\n` +
-                `*Daftar Produk:*\n${itemsText}\n\n` +
-                `*Total Bayar:* Rp ${Number(o.total).toLocaleString('id-ID')}`
-            );
-
-            window.open(`https://wa.me/6281234567890?text=${waMsg}`, '_blank');
-        }
-
-        function loadLocalOrRemoteData() {
-            const savedProds = localStorage.getItem('app_products');
-            if (savedProds) productsData = JSON.parse(savedProds);
-
-            const savedOrders = localStorage.getItem('app_orders');
-            if (savedOrders) ordersData = JSON.parse(savedOrders);
-
-            const savedLogs = localStorage.getItem('app_stock_logs');
-            if (savedLogs) stockLogsData = JSON.parse(savedLogs);
-        }
-
-        function saveDataLocal() {
-            localStorage.setItem('app_products', JSON.stringify(productsData));
-            localStorage.setItem('app_orders', JSON.stringify(ordersData));
-            localStorage.setItem('app_stock_logs', JSON.stringify(stockLogsData));
         }
 
         function renderCategoryBar() {
@@ -809,11 +703,9 @@
                     <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
                         <div onclick="openDetailModal('${p.id}')" class="cursor-pointer relative">
                             <div class="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden">
-                                <img src="${p.img || 'https://via.placeholder.com/300'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
+                                <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
                             </div>
-                            <div class="absolute top-2 left-2 flex flex-col gap-1">
-                                ${badgeHtml}
-                            </div>
+                            <div class="absolute top-2 left-2 flex flex-col gap-1">${badgeHtml}</div>
                         </div>
 
                         <div class="p-3 flex flex-col flex-1 justify-between">
@@ -844,16 +736,10 @@
             document.getElementById('modal-price').innerText = `Rp ${Number(p.price).toLocaleString('id-ID')}`;
             document.getElementById('modal-stock').innerText = `Stok: ${p.stock} pcs`;
             document.getElementById('modal-desc').innerText = p.desc || 'Tidak ada deskripsi.';
-            document.getElementById('modal-img').src = p.img || 'https://via.placeholder.com/300';
+            document.getElementById('modal-img').src = p.img;
 
             try {
-                JsBarcode("#barcode-canvas", p.barcode || p.id, {
-                    format: "CODE128",
-                    width: 1.5,
-                    height: 40,
-                    displayValue: true,
-                    fontSize: 10
-                });
+                JsBarcode("#barcode-canvas", p.barcode || p.id, { format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 10 });
             } catch(e) {}
 
             document.getElementById('detail-modal').classList.remove('hidden');
@@ -917,20 +803,14 @@
             const totalPriceEl = document.getElementById('cart-total-price');
 
             if (cartData.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-gray-400 text-xs">
-                        <i class="material-icons-outlined text-4xl mb-1">remove_shopping_cart</i>
-                        <p>Keranjang masih kosong.</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs"><i class="material-icons-outlined text-4xl mb-1">remove_shopping_cart</i><p>Keranjang masih kosong.</p></div>`;
                 totalPriceEl.innerText = 'Rp 0';
                 return;
             }
 
             let total = 0;
             container.innerHTML = cartData.map((item, idx) => {
-                const subtotal = item.price * item.qty;
-                total += subtotal;
+                total += item.price * item.qty;
                 return `
                     <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700">
                         <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
@@ -967,11 +847,19 @@
                 showToast('Keranjang Anda kosong', 'error');
                 return;
             }
+
+            if (!currentCustomer) {
+                openCustomerLoginModal();
+                return;
+            }
+
             toggleCartDrawer();
 
             const total = cartData.reduce((acc, c) => acc + (c.price * c.qty), 0);
             const count = cartData.reduce((acc, c) => acc + c.qty, 0);
 
+            document.getElementById('cust-name').value = currentCustomer.name || '';
+            document.getElementById('cust-phone').value = currentCustomer.phone || '';
             document.getElementById('checkout-item-count').innerText = `${count} barang`;
             document.getElementById('checkout-total-price').innerText = `Rp ${total.toLocaleString('id-ID')}`;
             document.getElementById('checkout-modal').classList.remove('hidden');
@@ -981,14 +869,32 @@
             document.getElementById('checkout-modal').classList.add('hidden');
         }
 
+        function openCustomerLoginModal() {
+            document.getElementById('customer-login-modal').classList.remove('hidden');
+        }
+
+        function closeCustomerLoginModal() {
+            document.getElementById('customer-login-modal').classList.add('hidden');
+        }
+
+        function handleCustomerLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('login-cust-phone').value;
+            const name = document.getElementById('login-cust-name').value;
+
+            currentCustomer = { name, phone };
+            localStorage.setItem('app_customer', JSON.stringify(currentCustomer));
+
+            closeCustomerLoginModal();
+            showToast(`Selamat datang, ${name}`);
+            openCheckoutModal();
+        }
+
         async function handleCheckoutSubmit(e) {
             e.preventDefault();
 
             const name = document.getElementById('cust-name').value;
             const phone = document.getElementById('cust-phone').value;
-            const address = document.getElementById('cust-address').value;
-            const note = document.getElementById('cust-note').value;
-
             const total = cartData.reduce((acc, c) => acc + (c.price * c.qty), 0);
             const invoiceNo = `INV/${new Date().toISOString().slice(0,10).replace(/-/g,'')}/${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -998,8 +904,6 @@
                 date: new Date().toLocaleString('id-ID'),
                 customer: name,
                 phone: phone,
-                address: address,
-                note: note,
                 items: cartData,
                 total: total,
                 status: 'Menunggu'
@@ -1007,7 +911,7 @@
 
             const btn = document.getElementById('btn-submit-order');
             btn.disabled = true;
-            btn.innerText = 'Memproses Pesanan...';
+            btn.innerText = 'Mengirim ke Spreadsheet...';
 
             if (configGASUrl) {
                 try {
@@ -1020,26 +924,103 @@
                 } catch(err) { console.error(err); }
             }
 
-            cartData.forEach(ci => {
-                const prod = productsData.find(p => p.id === ci.id);
-                if (prod) prod.stock -= ci.qty;
-            });
-
             ordersData.unshift(orderPayload);
-            saveDataLocal();
+            localStorage.setItem('app_orders', JSON.stringify(ordersData));
 
             cartData = [];
             updateCartBadge();
             closeCheckoutModal();
-            renderProducts();
 
             btn.disabled = false;
-            btn.innerText = 'Kirim Pesanan Sekarang';
+            btn.innerText = 'Simpan Pesanan ke Spreadsheet';
 
-            const waMsg = encodeURIComponent(`Halo Admin, Saya konfirmasi pesanan:\nInvoice: ${invoiceNo}\nNama: ${name}\nTotal: Rp ${total.toLocaleString('id-ID')}`);
-            window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${waMsg}`, '_blank');
+            showToast('Pesanan berhasil disimpan!');
+            openHistoryDetailModal(invoiceNo);
+        }
 
-            showToast('Pesanan berhasil dibuat!');
+        function openHistoryModal() {
+            if (!currentCustomer) {
+                openCustomerLoginModal();
+                return;
+            }
+
+            document.getElementById('history-cust-info').innerText = `Pelanggan: ${currentCustomer.name} (${currentCustomer.phone})`;
+            const container = document.getElementById('history-list-container');
+            const myOrders = ordersData.filter(o => String(o.phone) === String(currentCustomer.phone));
+
+            if (myOrders.length === 0) {
+                container.innerHTML = `<p class="text-xs text-center py-8 text-gray-400">Belum ada riwayat pesanan.</p>`;
+            } else {
+                container.innerHTML = myOrders.map(o => `
+                    <div onclick="openHistoryDetailModal('${o.invoice}')" class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-brand-500 transition">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-gray-900 dark:text-white">${o.invoice}</span>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">${o.status || 'Menunggu'}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-1">${o.date}</p>
+                        <div class="flex justify-between items-center mt-2 text-xs">
+                            <span class="text-gray-600 dark:text-gray-300">${o.items ? o.items.length : 0} item</span>
+                            <span class="font-bold text-brand-600">Rp ${Number(o.total).toLocaleString('id-ID')}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('history-modal').classList.remove('hidden');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        function logoutCustomer() {
+            localStorage.removeItem('app_customer');
+            currentCustomer = null;
+            closeHistoryModal();
+            showToast('Sesi WhatsApp berhasil dihapus');
+        }
+
+        function openHistoryDetailModal(invoice) {
+            const order = ordersData.find(o => o.invoice === invoice);
+            if (!order) return;
+
+            selectedOrderForDetail = order;
+
+            document.getElementById('detail-invoice').innerText = order.invoice;
+            document.getElementById('detail-date').innerText = order.date;
+            document.getElementById('detail-customer').innerText = `${order.customer} (${order.phone})`;
+            document.getElementById('detail-total').innerText = `Rp ${Number(order.total).toLocaleString('id-ID')}`;
+
+            const itemsContainer = document.getElementById('detail-items-list');
+            itemsContainer.innerHTML = (order.items || []).map(i => `
+                <div class="flex justify-between text-xs">
+                    <span>${i.name} x${i.qty}</span>
+                    <span class="font-semibold">Rp ${Number(i.price * i.qty).toLocaleString('id-ID')}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('history-detail-modal').classList.remove('hidden');
+        }
+
+        function closeHistoryDetailModal() {
+            document.getElementById('history-detail-modal').classList.add('hidden');
+        }
+
+        function sendWhatsAppToAdmin() {
+            if (!selectedOrderForDetail) return;
+            const o = selectedOrderForDetail;
+            const itemsText = (o.items || []).map(i => `- ${i.name} (${i.qty}x)`).join('\n');
+            const waMsg = encodeURIComponent(
+                `Halo Admin, Saya ingin konfirmasi pesanan:\n\n` +
+                `*Invoice:* ${o.invoice}\n` +
+                `*Tanggal:* ${o.date}\n` +
+                `*Nama:* ${o.customer}\n` +
+                `*No. HP:* ${o.phone}\n\n` +
+                `*Daftar Produk:*\n${itemsText}\n\n` +
+                `*Total Bayar:* Rp ${Number(o.total).toLocaleString('id-ID')}`
+            );
+
+            window.open(`https://wa.me/6281234567890?text=${waMsg}`, '_blank');
         }
 
         function toggleAdminView() {
@@ -1121,37 +1102,18 @@
             }
         }
 
-        function initChart() {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                    datasets: [{
-                        label: 'Penjualan (Rp)',
-                        data: [150000, 320000, 200000, 450000, 600000, 800000, 520000],
-                        borderColor: '#16a34a',
-                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
         function renderAdminProducts() {
             const container = document.getElementById('admin-product-list');
+            if (productsData.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400">Belum ada produk. Tambahkan produk pertama Anda.</p>`;
+                return;
+            }
             container.innerHTML = productsData.map(p => `
                 <div class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2 text-xs">
                     <img src="${p.img}" class="w-10 h-10 rounded-lg object-cover">
                     <div class="flex-1">
                         <h5 class="font-bold">${p.name}</h5>
-                        <span class="text-gray-500">${p.category} | Jual: Rp ${Number(p.price).toLocaleString('id-ID')} | Stok: ${p.stock}</span>
+                        <span class="text-gray-500">${p.category} | Rp ${Number(p.price).toLocaleString('id-ID')} | Stok: ${p.stock}</span>
                     </div>
                     <div class="flex gap-1">
                         <button onclick="deleteProduct('${p.id}')" class="p-1.5 bg-gray-100 dark:bg-gray-700 text-red-600 rounded-lg"><i class="material-icons-outlined text-sm">delete</i></button>
@@ -1170,7 +1132,7 @@
             document.getElementById('product-modal').classList.add('hidden');
         }
 
-        function handleProductFormSubmit(e) {
+        async function handleProductFormSubmit(e) {
             e.preventDefault();
             const id = 'P' + Date.now().toString().slice(-4);
             const name = document.getElementById('prod-name').value;
@@ -1183,17 +1145,52 @@
             const img = document.getElementById('prod-img').value || 'https://via.placeholder.com/300';
             const desc = document.getElementById('prod-desc').value;
 
-            productsData.push({ id, name, category, cost, price, stock, minStock, barcode, img, desc });
-            saveDataLocal();
+            const newProd = { id, name, category, cost, price, stock, minStock, barcode, img, desc };
+            
+            const btn = document.getElementById('btn-submit-prod');
+            btn.disabled = true;
+            btn.innerText = 'Menyimpan ke Spreadsheet...';
+
+            if (configGASUrl) {
+                try {
+                    await fetch(configGASUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'tambahProduk', ...newProd })
+                    });
+                } catch(err) { console.error(err); }
+            }
+
+            productsData.push(newProd);
+            localStorage.setItem('app_products', JSON.stringify(productsData));
+
             closeProductModal();
             renderAdminProducts();
             renderProducts();
-            showToast('Produk baru ditambahkan');
+            
+            btn.disabled = false;
+            btn.innerText = 'Simpan Produk ke Spreadsheet';
+            showToast('Produk berhasil disimpan ke Spreadsheet!');
         }
 
-        function deleteProduct(id) {
+        async function deleteProduct(id) {
+            if (!confirm('Hapus produk ini dari katalog?')) return;
+
+            if (configGASUrl) {
+                try {
+                    await fetch(configGASUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'hapusProduk', id: id })
+                    });
+                } catch(err) { console.error(err); }
+            }
+
             productsData = productsData.filter(x => x.id !== id);
-            saveDataLocal();
+            localStorage.setItem('app_products', JSON.stringify(productsData));
+
             renderAdminProducts();
             renderProducts();
             showToast('Produk terhapus');
@@ -1201,26 +1198,10 @@
 
         function renderAdminStock() {
             const select = document.getElementById('stock-adjust-product');
-            select.innerHTML = productsData.map(p => `<option value="${p.id}">${p.name} (Stok: ${p.stock})</option>`).join('');
-
-            const historyContainer = document.getElementById('stock-history-list');
-            if (stockLogsData.length === 0) {
-                historyContainer.innerHTML = `<p class="text-gray-400">Belum ada riwayat penyesuaian stok.</p>`;
-                return;
-            }
-
-            historyContainer.innerHTML = stockLogsData.map(l => `
-                <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
-                    <div>
-                        <span class="font-bold">${l.productName}</span>
-                        <p class="text-[10px] text-gray-400">${l.date} - ${l.note}</p>
-                    </div>
-                    <span class="font-bold ${l.type === 'in' ? 'text-emerald-500' : 'text-red-500'}">${l.type === 'in' ? '+' : '-'}${l.qty}</span>
-                </div>
-            `).join('');
+            select.innerHTML = productsData.map(p => `<option value="${p.id}">${p.name} (Sisa: ${p.stock})</option>`).join('');
         }
 
-        function handleStockAdjust(e) {
+        async function handleStockAdjust(e) {
             e.preventDefault();
             const prodId = document.getElementById('stock-adjust-product').value;
             const type = document.getElementById('stock-adjust-type').value;
@@ -1230,19 +1211,29 @@
             const prod = productsData.find(p => p.id === prodId);
             if (!prod) return;
 
+            const btn = document.getElementById('btn-adjust-stock');
+            btn.disabled = true;
+            btn.innerText = 'Mengirim Penyesuaian...';
+
+            if (configGASUrl) {
+                try {
+                    await fetch(configGASUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'updateStok', id: prodId, type: type, qty: qty, note: note })
+                    });
+                } catch(err) { console.error(err); }
+            }
+
             prod.stock = type === 'in' ? prod.stock + qty : Math.max(0, prod.stock - qty);
+            localStorage.setItem('app_products', JSON.stringify(productsData));
 
-            stockLogsData.unshift({
-                date: new Date().toLocaleString('id-ID'),
-                productName: prod.name,
-                type: type,
-                qty: qty,
-                note: note || 'Penyesuaian manual'
-            });
-
-            saveDataLocal();
             renderAdminStock();
             renderProducts();
+            
+            btn.disabled = false;
+            btn.innerText = 'Update Stok ke Spreadsheet';
             showToast('Stok berhasil diperbarui');
         }
 
@@ -1260,23 +1251,15 @@
                         <span class="text-brand-600">Rp ${Number(o.total).toLocaleString('id-ID')}</span>
                     </div>
                     <div class="text-gray-500">${o.customer} (${o.phone}) - ${o.date}</div>
-                    <div class="text-[11px] text-gray-600 dark:text-gray-300">
-                        ${o.items.map(i => `${i.name} (${i.qty}x)`).join(', ')}
-                    </div>
                 </div>
             `).join('');
         }
 
         function saveSettings() {
             configGASUrl = document.getElementById('cfg-gas-url').value;
-            configTelegramToken = document.getElementById('cfg-telegram-token').value;
-            configTelegramChatId = document.getElementById('cfg-telegram-chatid').value;
-
             localStorage.setItem('cfg_gas_url', configGASUrl);
-            localStorage.setItem('cfg_telegram_token', configTelegramToken);
-            localStorage.setItem('cfg_telegram_chatid', configTelegramChatId);
-
-            showToast('Konfigurasi berhasil disimpan');
+            showToast('Konfigurasi URL API Berhasil Disimpan');
+            loadLiveCatalog(true);
         }
 
         function scrollToProducts() {
