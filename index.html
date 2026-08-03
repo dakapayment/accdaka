@@ -530,8 +530,9 @@
         let selectedProductForDetail = null;
         let isAdminLoggedIn = false;
 
-        // BACA URL API GAS DARI CONFIG LOCALSTORAGE
-        let configGASUrl = localStorage.getItem('cfg_gas_url') || '';
+        // URL API GOOGLE APPS SCRIPT DEFAULT
+        const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyZvOYu8Ypq7OL2gbcZQnf7Vb6M0-RF9vKdxZ0PpbqazZYIv1JoJyjH4P7WcuUQC2og/exec';
+        let configGASUrl = localStorage.getItem('cfg_gas_url') || DEFAULT_GAS_URL;
 
         const defaultCategories = [
             { id: '1', name: 'LCD', icon: 'smartphone' },
