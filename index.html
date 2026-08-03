@@ -96,6 +96,12 @@
                     <i class="material-icons-outlined absolute left-2.5 top-2 text-gray-400 text-sm">search</i>
                 </div>
 
+                <!-- Customer History Button -->
+                <button onclick="openHistoryModal()" title="Riwayat Transaksi" class="p-2 rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 hover:bg-brand-100 transition flex items-center gap-1">
+                    <i class="material-icons-outlined text-xl">receipt_long</i>
+                    <span class="text-xs font-semibold hidden md:inline">Riwayat</span>
+                </button>
+
                 <!-- Admin Mode Toggle Button -->
                 <button onclick="toggleAdminView()" title="Portal Admin" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
                     <i class="material-icons-outlined text-xl">admin_panel_settings</i>
@@ -371,32 +377,24 @@
         <div id="checkout-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
             <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center border-b pb-2 dark:border-gray-800">
-                    <h3 class="font-bold text-base">Formulir Pemesanan</h3>
+                    <h3 class="font-bold text-base">Konfirmasi Pemesanan</h3>
                     <button onclick="closeCheckoutModal()" class="text-gray-400 hover:text-gray-600"><i class="material-icons-outlined">close</i></button>
                 </div>
 
                 <form onsubmit="handleCheckoutSubmit(event)" class="space-y-3 mt-3">
                     <div>
                         <label class="block text-xs font-medium mb-1">Nama Lengkap *</label>
-                        <input type="text" id="cust-name" required placeholder="Contoh: Budi Santoso" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium mb-1">Nomor WhatsApp *</label>
-                        <input type="tel" id="cust-phone" required placeholder="081234567890" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium mb-1">Alamat Pengiriman (Opsional)</label>
-                        <textarea id="cust-address" rows="2" placeholder="Jl. Mawar No. 12..." class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium mb-1">Catatan Pesanan</label>
-                        <input type="text" id="cust-note" placeholder="Warna, tipe HP, dsb." class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800">
+                        <input type="text" id="cust-name" required placeholder="Masukkan Nama Anda" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800">
                     </div>
 
+                    <!-- Hidden or Auto-filled Phone field linked to Customer Session -->
+                    <input type="hidden" id="cust-phone">
+
+                    <!-- Summary -->
                     <div class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700 text-xs space-y-1">
                         <div class="flex justify-between">
                             <span>Total Item</span>
-                            <span id="checkout-item-count">0 barang</span>
+                            <span class="font-bold" id="checkout-item-count">0 barang</span>
                         </div>
                         <div class="flex justify-between font-bold text-brand-600 text-sm pt-1 border-t border-gray-200 dark:border-gray-700">
                             <span>Total Bayar</span>
@@ -405,9 +403,98 @@
                     </div>
 
                     <button type="submit" id="btn-submit-order" class="w-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold py-3 rounded-xl shadow-md transition">
-                        Kirim Pesanan Sekarang
+                        Buat Pesanan (Simpan ke Riwayat)
                     </button>
                 </form>
+            </div>
+        </div>
+
+        <!-- CUSTOMER LOGIN MODAL (BY PHONE NUMBER) -->
+        <div id="customer-login-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+            <div class="bg-white dark:bg-gray-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-gray-100 dark:border-gray-700">
+                <div class="text-center mb-4">
+                    <div class="w-12 h-12 bg-brand-100 dark:bg-brand-950 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                        <i class="material-icons-outlined text-2xl">phone_iphone</i>
+                    </div>
+                    <h2 class="font-bold text-lg">Masuk Pelanggan</h2>
+                    <p class="text-xs text-gray-500">Masukkan Nomor WhatsApp untuk melihat Riwayat & Membuat Pesanan.</p>
+                </div>
+                <form onsubmit="handleCustomerLogin(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Nomor WhatsApp *</label>
+                        <input type="tel" id="login-cust-phone" required placeholder="081234567890" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-brand-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Nama Lengkap *</label>
+                        <input type="text" id="login-cust-name" required placeholder="Contoh: Budi Santoso" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 outline-none focus:ring-2 focus:ring-brand-600">
+                    </div>
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium text-xs py-3 rounded-xl shadow-md transition">Lanjutkan</button>
+                    <button type="button" onclick="closeCustomerLoginModal()" class="w-full text-xs text-gray-500 hover:underline">Batal</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TRANSACTION HISTORY MODAL -->
+        <div id="history-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+            <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl p-5 shadow-2xl max-h-[90vh] flex flex-col">
+                <div class="flex justify-between items-center border-b pb-3 dark:border-gray-800">
+                    <div>
+                        <h3 class="font-bold text-base">Riwayat Transaksi</h3>
+                        <p class="text-[11px] text-gray-500" id="history-cust-info">Pelanggan: -</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="logoutCustomer()" class="text-xs text-red-500 hover:underline">Ganti No. HP</button>
+                        <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-gray-600"><i class="material-icons-outlined">close</i></button>
+                    </div>
+                </div>
+
+                <div id="history-list-container" class="flex-1 overflow-y-auto py-3 space-y-2">
+                    <!-- History list items injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY TRANSACTION DETAIL MODAL -->
+        <div id="history-detail-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+            <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+                <div class="flex justify-between items-center border-b pb-2 dark:border-gray-800">
+                    <h3 class="font-bold text-base">Rincian Pesanan</h3>
+                    <button onclick="closeHistoryDetailModal()" class="text-gray-400 hover:text-gray-600"><i class="material-icons-outlined">close</i></button>
+                </div>
+
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Invoice:</span>
+                        <span class="font-bold" id="detail-invoice">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Tanggal:</span>
+                        <span id="detail-date">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Pemesan:</span>
+                        <span class="font-semibold" id="detail-customer">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500">Status Pesanan:</span>
+                        <span id="detail-status" class="px-2 py-0.5 rounded-full text-[10px] font-bold"></span>
+                    </div>
+
+                    <div class="border-t border-b dark:border-gray-800 py-2 my-2 space-y-1.5">
+                        <span class="font-semibold block mb-1">Daftar Barang:</span>
+                        <div id="detail-items-list" class="space-y-1"></div>
+                    </div>
+
+                    <div class="flex justify-between text-sm font-bold text-brand-600">
+                        <span>Total Bayar:</span>
+                        <span id="detail-total">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Send Button -->
+                <button onclick="sendWhatsAppToAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2 transition">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Kirim WhatsApp ke Admin
+                </button>
             </div>
         </div>
 
@@ -472,35 +559,8 @@
     </div>
 
     <script>
-        let categoriesData = [
-            { id: '1', name: 'LCD' },
-            { id: '2', name: 'Baterai' },
-            { id: '3', name: 'Flexible' },
-            { id: '4', name: 'Tombol' },
-            { id: '5', name: 'Lem & Tools' },
-            { id: '6', name: 'Charger' },
-            { id: '7', name: 'Lainnya' }
-        ];
-
-        let productsData = [
-            { id: 'P01', name: 'LCD iPhone 11 Original Fullset', category: 'LCD', cost: 250000, price: 380000, stock: 8, minStock: 3, barcode: '8991001', img: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400', desc: 'LCD Garansi Tes 7 hari. Kontras jernih & touch presisi.' },
-            { id: 'P02', name: 'Baterai Samsung A50 Original BPK', category: 'Baterai', cost: 65000, price: 110000, stock: 2, minStock: 3, barcode: '8991002', img: 'https://images.unsplash.com/photo-1619725002198-6a689b72f41d?w=400', desc: 'Baterai kapasitas murni 4000mAh awet tahan lama.' },
-            { id: 'P03', name: 'Lem LCD T7000 Hitam 110ml', category: 'Lem & Tools', cost: 18000, price: 35000, stock: 15, minStock: 5, barcode: '8991003', img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400', desc: 'Lem perekat LCD & Backdoor rekat maksimal.' },
-            { id: 'P04', name: 'Flexible On Off Xiaomi Redmi Note 8', category: 'Flexible', cost: 8000, price: 20000, stock: 0, minStock: 3, barcode: '8991004', img: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?w=400', desc: 'Flexible power + volume pengganti tombol bermasalah.' },
-        ];
-
-        let ordersData = [];
-        let stockLogsData = [];
-        let cartData = [];
-        let currentCategory = 'All';
-        let currentSearch = '';
-        let currentSort = 'default';
-        let selectedProductForDetail = null;
-        let isAdminLoggedIn = false;
-
-        let configGASUrl = localStorage.getItem('cfg_gas_url') || '';
-        let configTelegramToken = localStorage.getItem('cfg_telegram_token') || '';
-        let configTelegramChatId = localStorage.getItem('cfg_telegram_chatid') || '';
+        let currentCustomer = JSON.parse(localStorage.getItem('app_customer') || 'null');
+        let selectedOrderForDetail = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             loadLocalOrRemoteData();
@@ -514,14 +574,229 @@
             document.getElementById('cfg-telegram-chatid').value = configTelegramChatId;
         });
 
-        function showToast(msg, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bg = type === 'success' ? 'bg-emerald-600' : 'bg-red-600';
-            toast.className = `${bg} text-white text-xs px-4 py-2.5 rounded-xl shadow-lg flex items-center justify-between pointer-events-auto transition-all transform duration-300`;
-            toast.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()" class="ml-2 font-bold">&times;</button>`;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+        /* CUSTOMER LOGIN BY PHONE */
+        function checkCustomerLogin(callback) {
+            if (currentCustomer && currentCustomer.phone) {
+                if (callback) callback();
+            } else {
+                openCustomerLoginModal(callback);
+            }
+        }
+
+        function openCustomerLoginModal(pendingAction = null) {
+            window.pendingCustomerAction = pendingAction;
+            document.getElementById('customer-login-modal').classList.remove('hidden');
+        }
+
+        function closeCustomerLoginModal() {
+            document.getElementById('customer-login-modal').classList.add('hidden');
+        }
+
+        async function handleCustomerLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('login-cust-phone').value.trim();
+            const name = document.getElementById('login-cust-name').value.trim();
+
+            if (!phone || !name) return;
+
+            currentCustomer = { phone, name };
+            localStorage.setItem('app_customer', JSON.stringify(currentCustomer));
+
+            // Sync Customer to GAS Spreadsheet Database
+            if (configGASUrl) {
+                try {
+                    await fetch(configGASUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'loginCustomer', phone, name })
+                    });
+                } catch(err) { console.error(err); }
+            }
+
+            closeCustomerLoginModal();
+            showToast(`Selamat datang, ${name}`);
+
+            if (window.pendingCustomerAction) {
+                window.pendingCustomerAction();
+                window.pendingCustomerAction = null;
+            }
+        }
+
+        function logoutCustomer() {
+            localStorage.removeItem('app_customer');
+            currentCustomer = null;
+            closeHistoryModal();
+            showToast('Sesi nomor HP diakhiri');
+        }
+
+        /* CHECKOUT MODAL OVERRIDE */
+        function openCheckoutModal() {
+            if (cartData.length === 0) {
+                showToast('Keranjang Anda kosong', 'error');
+                return;
+            }
+
+            checkCustomerLogin(() => {
+                toggleCartDrawer();
+
+                document.getElementById('cust-name').value = currentCustomer.name || '';
+                document.getElementById('cust-phone').value = currentCustomer.phone || '';
+
+                const total = cartData.reduce((acc, c) => acc + (c.price * c.qty), 0);
+                const count = cartData.reduce((acc, c) => acc + c.qty, 0);
+
+                document.getElementById('checkout-item-count').innerText = `${count} barang`;
+                document.getElementById('checkout-total-price').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+                document.getElementById('checkout-modal').classList.remove('hidden');
+            });
+        }
+
+        async function handleCheckoutSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('cust-name').value;
+            const phone = currentCustomer ? currentCustomer.phone : '0800000000';
+
+            const total = cartData.reduce((acc, c) => acc + (c.price * c.qty), 0);
+            const invoiceNo = `INV/${new Date().toISOString().slice(0,10).replace(/-/g,'')}/${Math.floor(1000 + Math.random() * 9000)}`;
+
+            const orderPayload = {
+                action: 'checkout',
+                invoice: invoiceNo,
+                date: new Date().toLocaleString('id-ID'),
+                customer: name,
+                phone: phone,
+                items: cartData,
+                total: total,
+                status: 'Menunggu'
+            };
+
+            const btn = document.getElementById('btn-submit-order');
+            btn.disabled = true;
+            btn.innerText = 'Memproses Pesanan...';
+
+            if (configGASUrl) {
+                try {
+                    await fetch(configGASUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderPayload)
+                    });
+                } catch(err) { console.error(err); }
+            }
+
+            cartData.forEach(ci => {
+                const prod = productsData.find(p => p.id === ci.id);
+                if (prod) prod.stock -= ci.qty;
+            });
+
+            ordersData.unshift(orderPayload);
+            saveDataLocal();
+
+            cartData = [];
+            updateCartBadge();
+            closeCheckoutModal();
+            renderProducts();
+
+            btn.disabled = false;
+            btn.innerText = 'Buat Pesanan (Simpan ke Riwayat)';
+
+            showToast('Pesanan berhasil dibuat & tersimpan di Riwayat!');
+            openHistoryModal();
+        }
+
+        /* TRANSACTION HISTORY LOGIC */
+        function openHistoryModal() {
+            checkCustomerLogin(() => {
+                document.getElementById('history-cust-info').innerText = `Pelanggan: ${currentCustomer.name} (${currentCustomer.phone})`;
+                renderHistoryList();
+                document.getElementById('history-modal').classList.remove('hidden');
+            });
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('history-list-container');
+            const myOrders = ordersData.filter(o => o.phone === currentCustomer.phone);
+
+            if (myOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-gray-400 text-xs">
+                        <i class="material-icons-outlined text-4xl mb-1">receipt</i>
+                        <p>Belum ada riwayat pesanan.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = myOrders.map(o => `
+                <div onclick="openHistoryDetailModal('${o.invoice}')" class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-brand-500 transition space-y-1">
+                    <div class="flex justify-between items-center text-xs font-bold">
+                        <span>${o.invoice}</span>
+                        <span class="text-brand-600">Rp ${Number(o.total).toLocaleString('id-ID')}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] text-gray-400">
+                        <span>${o.date}</span>
+                        <span class="px-2 py-0.5 rounded-full font-bold ${o.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${o.status || 'Menunggu'}</span>
+                    </div>
+                    <div class="text-[11px] text-gray-600 dark:text-gray-300 line-clamp-1 pt-1">
+                        ${o.items.map(i => `${i.name} (${i.qty}x)`).join(', ')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openHistoryDetailModal(invoice) {
+            const order = ordersData.find(o => o.invoice === invoice);
+            if (!order) return;
+
+            selectedOrderForDetail = order;
+
+            document.getElementById('detail-invoice').innerText = order.invoice;
+            document.getElementById('detail-date').innerText = order.date;
+            document.getElementById('detail-customer').innerText = `${order.customer} (${order.phone})`;
+            document.getElementById('detail-total').innerText = `Rp ${Number(order.total).toLocaleString('id-ID')}`;
+
+            const statusEl = document.getElementById('detail-status');
+            statusEl.innerText = order.status || 'Menunggu';
+            statusEl.className = `px-2 py-0.5 rounded-full text-[10px] font-bold ${order.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`;
+
+            const itemsContainer = document.getElementById('detail-items-list');
+            itemsContainer.innerHTML = order.items.map(i => `
+                <div class="flex justify-between text-xs">
+                    <span>${i.name} x${i.qty}</span>
+                    <span class="font-semibold">Rp ${Number(i.price * i.qty).toLocaleString('id-ID')}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('history-detail-modal').classList.remove('hidden');
+        }
+
+        function closeHistoryDetailModal() {
+            document.getElementById('history-detail-modal').classList.add('hidden');
+        }
+
+        function sendWhatsAppToAdmin() {
+            if (!selectedOrderForDetail) return;
+
+            const o = selectedOrderForDetail;
+            const itemsText = o.items.map(i => `- ${i.name} (${i.qty}x)`).join('\n');
+            const waMsg = encodeURIComponent(
+                `Halo Admin, Saya ingin konfirmasi pesanan:\n\n` +
+                `*Invoice:* ${o.invoice}\n` +
+                `*Tanggal:* ${o.date}\n` +
+                `*Nama:* ${o.customer}\n` +
+                `*No. HP:* ${o.phone}\n\n` +
+                `*Daftar Produk:*\n${itemsText}\n\n` +
+                `*Total Bayar:* Rp ${Number(o.total).toLocaleString('id-ID')}`
+            );
+
+            window.open(`https://wa.me/6281234567890?text=${waMsg}`, '_blank');
         }
 
         function loadLocalOrRemoteData() {
