@@ -184,7 +184,7 @@
                     <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                         <div>
                             <label class="block text-xs font-medium mb-1">Password Admin</label>
-                            <input type="password" id="admin-pass-input" required placeholder="Sandi: admin123" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-brand-600 outline-none">
+                            <input type="password" id="admin-pass-input" required placeholder="mau kan??" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-brand-600 outline-none">
                         </div>
                         <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium text-xs py-3 rounded-xl shadow-md transition">Masuk Panel</button>
                         <button type="button" onclick="switchTab('store')" class="w-full text-xs text-gray-500 hover:underline">Kembali ke Katalog</button>
@@ -1052,7 +1052,7 @@
         function handleAdminLogin(e) {
             e.preventDefault();
             const pass = document.getElementById('admin-pass-input').value;
-            if (pass === 'admin123' || pass === 'admin') {
+            if (pass === '123456' || pass === 'admin') {
                 isAdminLoggedIn = true;
                 document.getElementById('admin-login-modal').classList.add('hidden');
                 showToast('Login Admin Berhasil');
