@@ -562,191 +562,112 @@
         let currentCustomer = JSON.parse(localStorage.getItem('app_customer') || 'null');
         let selectedOrderForDetail = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadLocalOrRemoteData();
+        const defaultCategories = [
+            { id: '1', name: 'LCD', icon: 'smartphone' },
+            { id: '2', name: 'Baterai', icon: 'battery_full' },
+            { id: '3', name: 'Flexible', icon: 'cable' },
+            { id: '4', name: 'Tombol', icon: 'radio_button_checked' },
+            { id: '5', name: 'Lem & Tools', icon: 'build' },
+            { id: '6', name: 'Charger', icon: 'power' },
+            { id: '7', name: 'Lainnya', icon: 'more_horiz' }
+        ];
+
+        const defaultProducts = [
+            { id: 'P01', name: 'LCD iPhone 11 Original Fullset', category: 'LCD', cost: 250000, price: 380000, stock: 8, minStock: 3, barcode: '8991001', img: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400', desc: 'LCD Garansi Tes 7 hari. Kontras jernih & touch presisi.' },
+            { id: 'P02', name: 'Baterai Samsung A50 Original BPK', category: 'Baterai', cost: 65000, price: 110000, stock: 2, minStock: 3, barcode: '8991002', img: 'https://images.unsplash.com/photo-1619725002198-6a689b72f41d?w=400', desc: 'Baterai kapasitas murni 4000mAh awet tahan lama.' },
+            { id: 'P03', name: 'Lem LCD T7000 Hitam 110ml', category: 'Lem & Tools', cost: 18000, price: 35000, stock: 15, minStock: 5, barcode: '8991003', img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400', desc: 'Lem perekat LCD & Backdoor rekat maksimal tidak merusak frame.' },
+            { id: 'P04', name: 'Flexible On Off Xiaomi Redmi Note 8', category: 'Flexible', cost: 8000, price: 20000, stock: 0, minStock: 3, barcode: '8991004', img: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?w=400', desc: 'Flexible power + volume pengganti tombol bermasalah.' }
+        ];
+
+        let categoriesData = defaultCategories;
+        let productsData = defaultProducts;
+        let ordersData = [];
+        let stockLogsData = [];
+        let cartData = [];
+        let currentCategory = 'All';
+        let currentSearch = '';
+        let currentSort = 'default';
+        let selectedProductForDetail = null;
+        let isAdminLoggedIn = false;
+
+        // Config State
+        let configGASUrl = localStorage.getItem('cfg_gas_url') || '';
+        let configTelegramToken = localStorage.getItem('cfg_telegram_token') || '';
+        let configTelegramChatId = localStorage.getItem('cfg_telegram_chatid') || '';
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            renderCategoryBar();
+            renderSkeletonProducts();
+            await loadLocalOrRemoteData();
             renderCategoryBar();
             renderProducts();
             updateCartBadge();
             initChart();
 
-            document.getElementById('cfg-gas-url').value = configGASUrl;
-            document.getElementById('cfg-telegram-token').value = configTelegramToken;
-            document.getElementById('cfg-telegram-chatid').value = configTelegramChatId;
+            if (document.getElementById('cfg-gas-url')) {
+                document.getElementById('cfg-gas-url').value = configGASUrl;
+                document.getElementById('cfg-telegram-token').value = configTelegramToken;
+                document.getElementById('cfg-telegram-chatid').value = configTelegramChatId;
+            }
         });
 
-        /* CUSTOMER LOGIN BY PHONE */
-        function checkCustomerLogin(callback) {
-            if (currentCustomer && currentCustomer.phone) {
-                if (callback) callback();
-            } else {
-                openCustomerLoginModal(callback);
+        function normalizeProductData(raw) {
+            if (!Array.isArray(raw)) return [];
+            return raw.map((item, index) => ({
+                id: String(item.id || item.ID || 'P' + index),
+                name: String(item.name || item.Nama || 'Produk Tanpa Nama'),
+                category: String(item.category || item.Kategori || 'Lainnya'),
+                cost: parseFloat(item.cost || item.Modal || 0),
+                price: parseFloat(item.price || item.Harga || 0),
+                stock: parseInt(item.stock || item.Stok || 0),
+                minStock: parseInt(item.minStock || item.MinimalStok || 3),
+                barcode: String(item.barcode || item.Barcode || ''),
+                img: item.img || item.Foto || 'https://via.placeholder.com/300',
+                desc: item.desc || item.Deskripsi || ''
+            }));
+        }
+
+        async function loadLocalOrRemoteData() {
+            // 1. Cek LocalStorage
+            const savedProds = localStorage.getItem('app_products');
+            if (savedProds) {
+                try { productsData = JSON.parse(savedProds); } catch(e){}
             }
-        }
 
-        function openCustomerLoginModal(pendingAction = null) {
-            window.pendingCustomerAction = pendingAction;
-            document.getElementById('customer-login-modal').classList.remove('hidden');
-        }
+            const savedOrders = localStorage.getItem('app_orders');
+            if (savedOrders) {
+                try { ordersData = JSON.parse(savedOrders); } catch(e){}
+            }
 
-        function closeCustomerLoginModal() {
-            document.getElementById('customer-login-modal').classList.add('hidden');
-        }
+            const savedLogs = localStorage.getItem('app_stock_logs');
+            if (savedLogs) {
+                try { stockLogsData = JSON.parse(savedLogs); } catch(e){}
+            }
 
-        async function handleCustomerLogin(e) {
-            e.preventDefault();
-            const phone = document.getElementById('login-cust-phone').value.trim();
-            const name = document.getElementById('login-cust-name').value.trim();
-
-            if (!phone || !name) return;
-
-            currentCustomer = { phone, name };
-            localStorage.setItem('app_customer', JSON.stringify(currentCustomer));
-
-            // Sync Customer to GAS Spreadsheet Database
+            // 2. Ambil data dari Google Apps Script jika URL dikonfigurasi
             if (configGASUrl) {
                 try {
-                    await fetch(configGASUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'loginCustomer', phone, name })
-                    });
-                } catch(err) { console.error(err); }
-            }
-
-            closeCustomerLoginModal();
-            showToast(`Selamat datang, ${name}`);
-
-            if (window.pendingCustomerAction) {
-                window.pendingCustomerAction();
-                window.pendingCustomerAction = null;
+                    const res = await fetch(`${configGASUrl}?action=getProduk`);
+                    const resJson = await res.json();
+                    if (resJson.status === 'success' && Array.isArray(resJson.data) && resJson.data.length > 0) {
+                        productsData = normalizeProductData(resJson.data);
+                        saveDataLocal();
+                    }
+                } catch (err) {
+                    console.warn('Gagal mengambil data dari Apps Script, menggunakan data lokal:', err);
+                }
             }
         }
 
-        function logoutCustomer() {
-            localStorage.removeItem('app_customer');
-            currentCustomer = null;
-            closeHistoryModal();
-            showToast('Sesi nomor HP diakhiri');
-        }
-
-        /* CHECKOUT MODAL OVERRIDE */
-        function openCheckoutModal() {
-            if (cartData.length === 0) {
-                showToast('Keranjang Anda kosong', 'error');
-                return;
-            }
-
-            checkCustomerLogin(() => {
-                toggleCartDrawer();
-
-                document.getElementById('cust-name').value = currentCustomer.name || '';
-                document.getElementById('cust-phone').value = currentCustomer.phone || '';
-
-                const total = cartData.reduce((acc, c) => acc + (c.price * c.qty), 0);
-                const count = cartData.reduce((acc, c) => acc + c.qty, 0);
-
-                document.getElementById('checkout-item-count').innerText = `${count} barang`;
-                document.getElementById('checkout-total-price').innerText = `Rp ${total.toLocaleString('id-ID')}`;
-                document.getElementById('checkout-modal').classList.remove('hidden');
-            });
-        }
-
-        async function handleCheckoutSubmit(e) {
-            e.preventDefault();
-
-            const name = document.getElementById('cust-name').value;
-            const phone = currentCustomer ? currentCustomer.phone : '0800000000';
-
-            const total = cartData.reduce((acc, c) => acc + (c.price * c.qty), 0);
-            const invoiceNo = `INV/${new Date().toISOString().slice(0,10).replace(/-/g,'')}/${Math.floor(1000 + Math.random() * 9000)}`;
-
-            const orderPayload = {
-                action: 'checkout',
-                invoice: invoiceNo,
-                date: new Date().toLocaleString('id-ID'),
-                customer: name,
-                phone: phone,
-                items: cartData,
-                total: total,
-                status: 'Menunggu'
-            };
-
-            const btn = document.getElementById('btn-submit-order');
-            btn.disabled = true;
-            btn.innerText = 'Memproses Pesanan...';
-
-            if (configGASUrl) {
-                try {
-                    await fetch(configGASUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(orderPayload)
-                    });
-                } catch(err) { console.error(err); }
-            }
-
-            cartData.forEach(ci => {
-                const prod = productsData.find(p => p.id === ci.id);
-                if (prod) prod.stock -= ci.qty;
-            });
-
-            ordersData.unshift(orderPayload);
-            saveDataLocal();
-
-            cartData = [];
-            updateCartBadge();
-            closeCheckoutModal();
-            renderProducts();
-
-            btn.disabled = false;
-            btn.innerText = 'Buat Pesanan (Simpan ke Riwayat)';
-
-            showToast('Pesanan berhasil dibuat & tersimpan di Riwayat!');
-            openHistoryModal();
-        }
-
-        /* TRANSACTION HISTORY LOGIC */
-        function openHistoryModal() {
-            checkCustomerLogin(() => {
-                document.getElementById('history-cust-info').innerText = `Pelanggan: ${currentCustomer.name} (${currentCustomer.phone})`;
-                renderHistoryList();
-                document.getElementById('history-modal').classList.remove('hidden');
-            });
-        }
-
-        function closeHistoryModal() {
-            document.getElementById('history-modal').classList.add('hidden');
-        }
-
-        function renderHistoryList() {
-            const container = document.getElementById('history-list-container');
-            const myOrders = ordersData.filter(o => o.phone === currentCustomer.phone);
-
-            if (myOrders.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-10 text-gray-400 text-xs">
-                        <i class="material-icons-outlined text-4xl mb-1">receipt</i>
-                        <p>Belum ada riwayat pesanan.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = myOrders.map(o => `
-                <div onclick="openHistoryDetailModal('${o.invoice}')" class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-brand-500 transition space-y-1">
-                    <div class="flex justify-between items-center text-xs font-bold">
-                        <span>${o.invoice}</span>
-                        <span class="text-brand-600">Rp ${Number(o.total).toLocaleString('id-ID')}</span>
-                    </div>
-                    <div class="flex justify-between items-center text-[10px] text-gray-400">
-                        <span>${o.date}</span>
-                        <span class="px-2 py-0.5 rounded-full font-bold ${o.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${o.status || 'Menunggu'}</span>
-                    </div>
-                    <div class="text-[11px] text-gray-600 dark:text-gray-300 line-clamp-1 pt-1">
-                        ${o.items.map(i => `${i.name} (${i.qty}x)`).join(', ')}
-                    </div>
+        function renderSkeletonProducts() {
+            const grid = document.getElementById('product-grid');
+            if (!grid) return;
+            grid.innerHTML = Array(4).fill(0).map(() => `
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-3 border border-gray-100 dark:border-gray-700 space-y-2 animate-pulse">
+                    <div class="aspect-square bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
                 </div>
             `).join('');
         }
