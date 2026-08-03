@@ -1,0 +1,202 @@
+/**
+ * BACKEND GOOGLE APPS SCRIPT REST API
+ * Untuk Aplikasi Katalog Aksesoris HP & Manajemen Stok
+ * * SPREADSHEET DATABASE STRUCTURE:
+ * 1. Sheet "Produk": ID, Barcode, Foto, Nama, Kategori, Modal, Harga, Stok, MinimalStok, Deskripsi, Status
+ * 2. Sheet "Kategori": ID, Nama, Icon, Urutan, Status
+ * 3. Sheet "Pesanan": Invoice, Tanggal, Nama, WhatsApp, Alamat, Produk, Qty, Total, Status, Catatan
+ * 4. Sheet "RiwayatStok": Tanggal, Produk, Masuk, Keluar, Sisa, Keterangan, Admin
+ * 5. Sheet "Pengaturan": Key, Value
+ */
+
+function doGet(e) {
+  var action = e.parameter.action || 'getProduk';
+  var response = {};
+
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    if (action === 'getProduk') {
+      response = { status: 'success', data: getSheetData(ss, 'Produk') };
+    } else if (action === 'getKategori') {
+      response = { status: 'success', data: getSheetData(ss, 'Kategori') };
+    } else if (action === 'getDashboard') {
+      response = { status: 'success', data: getDashboardStats(ss) };
+    } else {
+      response = { status: 'error', message: 'Action tidak dikenal' };
+    }
+  } catch (err) {
+    response = { status: 'error', message: err.toString() };
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(response))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var response = {};
+  
+  try {
+    var payload = JSON.parse(e.postData.contents);
+    var action = payload.action;
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    if (action === 'checkout') {
+      response = processCheckout(ss, payload);
+    } else if (action === 'tambahProduk') {
+      response = addProduct(ss, payload);
+    } else if (action === 'updateStok') {
+      response = adjustStock(ss, payload);
+    } else {
+      response = { status: 'error', message: 'Action POST tidak dikenal' };
+    }
+  } catch (err) {
+    response = { status: 'error', message: err.toString() };
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(response))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// HELPER: Ambil semua data dari sheet sebagai Array of Objects
+function getSheetData(ss, sheetName) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return [];
+  
+  var values = sheet.getDataRange().getValues();
+  if (values.length <= 1) return [];
+  
+  var headers = values[0];
+  var result = [];
+  
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = row[j];
+    }
+    result.push(obj);
+  }
+  return result;
+}
+
+// HANDLER: Proses Checkout Pesanan Pelanggan & Kurangi Stok
+function processCheckout(ss, data) {
+  var sheetPesanan = ss.getSheetByName('Pesanan');
+  var sheetProduk = ss.getSheetByName('Produk');
+  var sheetStok = ss.getSheetByName('RiwayatStok');
+  
+  var itemsString = data.items.map(function(i) {
+    return i.name + ' (' + i.qty + 'x)';
+  }).join(', ');
+
+  // 1. Catat ke Sheet Pesanan
+  sheetPesanan.appendRow([
+    data.invoice,
+    data.date || new Date(),
+    data.customer,
+    data.phone,
+    data.address || '',
+    itemsString,
+    data.items.reduce(function(a, b) { return a + b.qty; }, 0),
+    data.total,
+    'Menunggu',
+    data.note || ''
+  ]);
+
+  // 2. Kurangi Stok Produk di Sheet Produk
+  var prodData = sheetProduk.getDataRange().getValues();
+  for (var k = 0; k < data.items.length; k++) {
+    var item = data.items[k];
+    for (var i = 1; i < prodData.length; i++) {
+      if (prodData[i][0] == item.id) { // Column A = ID Produk
+        var currentStock = prodData[i][7]; // Column H = Stok
+        var newStock = Math.max(0, currentStock - item.qty);
+        sheetProduk.getRange(i + 1, 8).setValue(newStock);
+
+        // Log ke RiwayatStok
+        if (sheetStok) {
+          sheetStok.appendRow([
+            new Date(),
+            item.name,
+            0,
+            item.qty,
+            newStock,
+            'Pembelian ' + data.invoice,
+            'System'
+          ]);
+        }
+        break;
+      }
+    }
+  }
+
+  // 3. Kirim Telegram Alert dari GAS
+  sendTelegramNotif(ss, data);
+
+  return { status: 'success', message: 'Pesanan berhasil disimpan', invoice: data.invoice };
+}
+
+// HELPER: Kirim Notifikasi Telegram
+function sendTelegramNotif(ss, data) {
+  var sheetConfig = ss.getSheetByName('Pengaturan');
+  if (!sheetConfig) return;
+  
+  var configs = sheetConfig.getDataRange().getValues();
+  var botToken = '', chatId = '';
+  
+  for (var i = 0; i < configs.length; i++) {
+    if (configs[i][0] === 'Telegram_Token') botToken = configs[i][1];
+    if (configs[i][0] === 'Telegram_ChatID') chatId = configs[i][1];
+  }
+
+  if (!botToken || !chatId) return;
+
+  var itemLines = data.items.map(function(i) {
+    return '- ' + i.name + ' (' + i.qty + 'x)';
+  }).join('\n');
+
+  var msg = '====================\n' +
+            '🛒 *PESANAN BARU*\n' +
+            'Invoice: ' + data.invoice + '\n' +
+            'Nama: ' + data.customer + '\n' +
+            'WA: ' + data.phone + '\n\n' +
+            '*Daftar Produk:*\n' + itemLines + '\n\n' +
+            '*Total:* Rp ' + data.total.toLocaleString() + '\n' +
+            'Catatan: ' + (data.note || '-') + '\n' +
+            '====================';
+
+  var url = 'https://api.telegram.org/bot' + botToken + '/sendMessage';
+  var payload = {
+    chat_id: chatId,
+    text: msg,
+    parse_mode: 'Markdown'
+  };
+
+  UrlFetchApp.fetch(url, {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+}
+
+// SETUP DAN OTOMATISASI SHEET SPREADSHEET
+function setupDatabaseSheets() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  createSheetIfNotExist(ss, 'Produk', ['ID', 'Barcode', 'Foto', 'Nama', 'Kategori', 'Modal', 'Harga', 'Stok', 'MinimalStok', 'Deskripsi', 'Status']);
+  createSheetIfNotExist(ss, 'Kategori', ['ID', 'Nama', 'Icon', 'Urutan', 'Status']);
+  createSheetIfNotExist(ss, 'Pesanan', ['Invoice', 'Tanggal', 'Nama', 'WhatsApp', 'Alamat', 'Produk', 'Qty', 'Total', 'Status', 'Catatan']);
+  createSheetIfNotExist(ss, 'RiwayatStok', ['Tanggal', 'Produk', 'Masuk', 'Keluar', 'Sisa', 'Keterangan', 'Admin']);
+  createSheetIfNotExist(ss, 'Pengaturan', ['Key', 'Value']);
+}
+
+function createSheetIfNotExist(ss, name, headers) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.appendRow(headers);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#16a34a').setFontColor('#ffffff');
+  }
+}
